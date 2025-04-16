@@ -49,7 +49,7 @@ public class ShowMaxHaulPatch
         ShowTotalLoot.Logger.LogInfo($"{__instance} Start Postfix");
         
         _gameHud = GameObject.Find("Game Hud").transform;
-        _maxHaulGoalLabel = MenuAPI.CreateREPOLabel("Total Value: 0", _gameHud, localPosition: new Vector2(-260, -454));
+        _maxHaulGoalLabel = MenuAPI.CreateREPOLabel("Total Value", _gameHud, localPosition: new Vector2(146, -200));
         ShowTotalLoot.Logger.LogInfo($"maxHaulGoalLabel {_maxHaulGoalLabel}");
     }
     
