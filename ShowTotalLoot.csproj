@@ -32,5 +32,8 @@
       <HintPath>E:\Thunderstore Mod Manager\DataFolder\REPO\profiles\Dev\BepInEx\plugins\nickklmao-MenuLib\MenuLib.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Images\" />
+  </ItemGroup>
 
 </Project>
