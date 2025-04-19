@@ -3,23 +3,16 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
-using MenuLib;
-using MenuLib.MonoBehaviors;
-using ShowTotalLoot.Patches;
-using Unity.VisualScripting;
-using UnityEngine.Events;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 namespace ShowTotalLoot;
 
-[BepInPlugin(ModGUID, ModName, ModVersion)]
+[BepInPlugin(ModGuid, ModName, ModVersion)]
 public class ShowTotalLoot : BaseUnityPlugin
 {
     // Mod Details
-    private const string ModGUID = "ItsAGeBa.ShowTotalLoot";
+    private const string ModGuid = "ItsAGeBa.ShowTotalLoot";
     private const string ModName = "Show Total Loot";
-    private const string ModVersion = "1.0.0";
+    private const string ModVersion = "1.0.2";
     
     internal static ShowTotalLoot Instance { get; private set; } = null!;
     internal new static ManualLogSource Logger => Instance._logger;

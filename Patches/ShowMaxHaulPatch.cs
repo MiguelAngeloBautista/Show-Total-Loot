@@ -15,6 +15,12 @@ public class ShowMaxHaulPatch
     [HarmonyPostfix, HarmonyPatch(typeof(ExtractionPoint), nameof(ExtractionPoint.ActivateTheFirstExtractionPointAutomaticallyWhenAPlayerLeaveTruck))]
     private static void StartRound_Postfix(ExtractionPoint __instance)
     {
+        _maxHaulGoalLabel.gameObject.SetActive(true);
+        
+        foreach (ValuableObject valuable in ValuableDirector.instance.valuableList)
+        {
+            _currentMaxHaul += (int)valuable.dollarValueCurrent;
+        }
         ShowTotalLoot.Logger.LogInfo($"{__instance} Start Postfix");
 
         _currentMaxHaul = RoundDirector.instance.haulGoalMax;
@@ -34,6 +40,7 @@ public class ShowMaxHaulPatch
 
             float valueLost = __instance.valuableObject.dollarValueOriginal - __instance.valuableObject.dollarValueCurrent;
             _currentMaxHaul -= (int)valueLost;
+        _currentMaxHaul -= (int)(__instance.valuableObject.dollarValueOriginal - __instance.valuableObject.dollarValueCurrent);
         
             UpdateLabel(_currentMaxHaul);
         }
@@ -51,6 +58,7 @@ public class ShowMaxHaulPatch
         _gameHud = GameObject.Find("Game Hud").transform;
         _maxHaulGoalLabel = MenuAPI.CreateREPOLabel("Total Value", _gameHud, localPosition: new Vector2(146, -200));
         ShowTotalLoot.Logger.LogInfo($"maxHaulGoalLabel {_maxHaulGoalLabel}");
+        _maxHaulGoalLabel.gameObject.SetActive(false);
     }
     
     private static void UpdateLabel(int newMaxHaulGoal)
