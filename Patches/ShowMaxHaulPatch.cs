@@ -41,13 +41,17 @@ public class ShowMaxHaulPatch
     }
 
     [HarmonyPostfix, HarmonyPatch(typeof(PhysGrabObjectImpactDetector), nameof(PhysGrabObjectImpactDetector.BreakRPC))]
-    private static void BreakRPC_Postfix(PhysGrabObjectImpactDetector __instance)
+    private static void BreakRPC_Postfix(PhysGrabObjectImpactDetector __instance, float valueLost, bool _loseValue)
     {
         if (!__instance.valuableObject) return;
         
         ShowTotalLoot.Logger.LogDebug($"BreakRPC_Postfix(): {__instance} Start Postfix");
         
-        _currentMaxHaul -= (int)(__instance.valuableObject.dollarValueOriginal - __instance.valuableObject.dollarValueCurrent);
+        ShowTotalLoot.Logger.LogDebug($"BreakRPC_Postfix(): Item lost Value: {_loseValue}");
+        
+        if (!_loseValue) return;
+        ShowTotalLoot.Logger.LogDebug($"BreakRPC_Postfix(): {__instance.valuableObject.name} lost ${valueLost}");
+        _currentMaxHaul -= (int)(valueLost);
         
         UpdateLabel(_currentMaxHaul);
 

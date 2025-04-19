@@ -12,7 +12,7 @@ public class ShowTotalLoot : BaseUnityPlugin
     // Mod Details
     private const string ModGuid = "ItsAGeBa.ShowTotalLoot";
     private const string ModName = "Show Total Loot";
-    private const string ModVersion = "1.0.2";
+    private const string ModVersion = "1.0.3";
     
     internal static ShowTotalLoot Instance { get; private set; } = null!;
     internal new static ManualLogSource Logger => Instance._logger;
