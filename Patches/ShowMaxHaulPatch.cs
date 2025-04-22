@@ -32,9 +32,6 @@ public class ShowMaxHaulPatch
             _currentMaxHaul += (int)valuable.dollarValueCurrent;
         }
         ShowTotalLoot.Logger.LogDebug($"StartRound_Postfix(): Total valuables in map: {ValuableDirector.instance.valuableList.Count}");
-
-        _currentMaxHaul = RoundDirector.instance.haulGoalMax;
-
         UpdateLabel(_currentMaxHaul);
         ShowTotalLoot.Logger.LogDebug($"Round Max Haul: {_currentMaxHaul}");
 
@@ -46,7 +43,6 @@ public class ShowMaxHaulPatch
         if (!__instance.valuableObject) return;
         
         ShowTotalLoot.Logger.LogDebug($"BreakRPC_Postfix(): {__instance} Start Postfix");
-        
         ShowTotalLoot.Logger.LogDebug($"BreakRPC_Postfix(): Item lost Value: {_loseValue}");
         
         if (!_loseValue) return;
