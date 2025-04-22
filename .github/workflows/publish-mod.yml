@@ -1,0 +1,46 @@
+name: Publish to Thunderstore
+
+on: 
+  release:
+    types: [published]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get clean version
+        run: |
+          echo cleanVersion=$(echo ${{ github.ref_name }} | sed s/v//g) >> $GITHUB_ENV
+      - name: Check that version matches
+        run: |
+          if [[ "$(grep -Po "\d+\.\d+\.\d+" $(find ./ -name mod.json))" != "${{ env.cleanVersion }}" ]]; then
+            echo "::debug::${{ env.cleanVersion }}"
+            echo "::debug::$(cat $(find ./ -name mod.json ))"
+            echo "::error::Version in mod.json does not match tag version"
+            exit 1
+          fi
+  publish:
+    runs-on: ubuntu-latest
+    needs: verify
+    steps:
+      # Use checkout to publish the files in your repo
+      - uses: actions/checkout@v4
+      - uses: GreenTF/upload-thunderstore-package@v4.3
+        with:
+          # the thunderstore 'team' to publish under
+          namespace: itsageba 
+          # Description of Mod 
+          description: A simple mod that shows the total loot a player can collect from the level on their HUD. 
+          token: ${{ secrets.THUNDERSTORE_KEY }}
+          # the name of the package
+          name: ShowTotalLoot 
+          version: ${{ github.ref_name }} # Use the tag as the package version
+          community: repo
+          # A list, separated by spaces
+          deps: BepInEx-BepInExPack@5.4.2100 nickklmao-MenuLib@2.3.0
+          #A list, separated by newline characters
+          categories: |
+            clientside
+            mods
+            misc
