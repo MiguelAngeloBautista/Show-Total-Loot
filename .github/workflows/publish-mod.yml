@@ -4,28 +4,30 @@ on:
   release:
     types: [published]
 
+env:
+  name: ShotTotalLoot
+
 jobs:
-  verify:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Get clean version
-        run: |
-          echo cleanVersion=$(echo ${{ github.ref_name }} | sed s/v//g) >> $GITHUB_ENV
-      - name: Check that version matches
-        run: |
-          if [[ "$(grep -Po "\d+\.\d+\.\d+" $(find ./ -name mod.json))" != "${{ env.cleanVersion }}" ]]; then
-            echo "::debug::${{ env.cleanVersion }}"
-            echo "::debug::$(cat $(find ./ -name mod.json ))"
-            echo "::error::Version in mod.json does not match tag version"
-            exit 1
-          fi
   publish:
     runs-on: ubuntu-latest
-    needs: verify
     steps:
       # Use checkout to publish the files in your repo
       - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4.3.1
+        with: 
+          dotnet-version: '9.0.x'
+    
+      - name: Build the mod
+        run: dotnet build . -c Release
+
+      - name: Prepare package directory
+        run: |
+          mkdir -p package
+          cp README.md icon.png package/
+          cp ./bin/Release/netstandard2.1/${{ env.name }}.dll package/
+
       - uses: GreenTF/upload-thunderstore-package@87a940b1f508ab1a6866eded55a9539afdf09792
         with:
           # the thunderstore 'team' to publish under
@@ -34,7 +36,7 @@ jobs:
           description: A simple mod that shows the total loot a player can collect from the level on their HUD. 
           token: ${{ secrets.THUNDERSTORE_KEY }}
           # the name of the package
-          name: ShowTotalLoot 
+          name: ${{ env.name }} 
           version: ${{ github.ref_name }} # Use the tag as the package version
           community: repo
           # A list, separated by spaces
@@ -44,3 +46,4 @@ jobs:
             clientside
             mods
             misc
+          path: ./package
