@@ -26,7 +26,7 @@ jobs:
     steps:
       # Use checkout to publish the files in your repo
       - uses: actions/checkout@v4
-      - uses: GreenTF/upload-thunderstore-package@v4.3
+      - uses: GreenTF/upload-thunderstore-package@87a940b1f508ab1a6866eded55a9539afdf09792
         with:
           # the thunderstore 'team' to publish under
           namespace: itsageba 
