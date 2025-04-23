@@ -1,29 +1,40 @@
 ﻿using System;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using HarmonyLib;
 using UnityEngine;
 using MenuLib;
 using MenuLib.MonoBehaviors;
+
 namespace ShowTotalLoot.Patches;
 
 [HarmonyPatch(typeof(RoundDirector))]
 public class ShowMaxHaulPatch
 {
-    private static int _currentMaxHaul = 0;
+    private static int _currentMaxHaul;
     private static Transform? _gameHud;
     private static REPOLabel? _maxHaulGoalLabel;
-
+    
     [HarmonyPostfix, HarmonyPatch(typeof(ExtractionPoint), nameof(ExtractionPoint.ActivateTheFirstExtractionPointAutomaticallyWhenAPlayerLeaveTruck))]
     private static void StartRound_Postfix(ExtractionPoint __instance)
     {
         ShowTotalLoot.Logger.LogDebug($"StartRound_Postfix(): {__instance} Start Postfix");
         
         if (!LevelGenerator.Instance.Generated)
-            throw new InvalidOperationException("StartRoundLogic_Postfix(): LevelGenerator has not finished generating the level");
+        {
+            ShowTotalLoot.Logger.LogError("AddEnemyValuable_Postfix(): LevelGenerator has not finished generating the level");
+            return;
+        }
         if (_gameHud == null)
-            throw new NullReferenceException("StartRoundLogic_Postfix(): _gameHud is null");
+        {
+            ShowTotalLoot.Logger.LogError("AddEnemyValuable_Postfix(): _gameHud is null");
+            return;
+        }
         if (_maxHaulGoalLabel == null)
-            throw new NullReferenceException("StartRoundLogic_Postfix(): _maxHaulGoalLabel is null");
+        {
+            ShowTotalLoot.Logger.LogError("AddEnemyValuable_Postfix(): _maxHaulGoalLabel is null");
+            return;
+        }
         
         _maxHaulGoalLabel.gameObject.SetActive(true);
         
@@ -32,9 +43,6 @@ public class ShowMaxHaulPatch
             _currentMaxHaul += (int)valuable.dollarValueCurrent;
         }
         ShowTotalLoot.Logger.LogDebug($"StartRound_Postfix(): Total valuables in map: {ValuableDirector.instance.valuableList.Count}");
-
-        _currentMaxHaul = RoundDirector.instance.haulGoalMax;
-
         UpdateLabel(_currentMaxHaul);
         ShowTotalLoot.Logger.LogDebug($"Round Max Haul: {_currentMaxHaul}");
 
@@ -46,7 +54,6 @@ public class ShowMaxHaulPatch
         if (!__instance.valuableObject) return;
         
         ShowTotalLoot.Logger.LogDebug($"BreakRPC_Postfix(): {__instance} Start Postfix");
-        
         ShowTotalLoot.Logger.LogDebug($"BreakRPC_Postfix(): Item lost Value: {_loseValue}");
         
         if (!_loseValue) return;
@@ -68,12 +75,52 @@ public class ShowMaxHaulPatch
         ShowTotalLoot.Logger.LogDebug($"maxHaulGoalLabel {_maxHaulGoalLabel}");
     }
     
+    [HarmonyPostfix, HarmonyPatch(typeof(EnemyDirector), nameof(EnemyDirector.AddEnemyValuable))]
+    private static void AddEnemyValuable_Postfix(EnemyDirector __instance, EnemyValuable _newValuable)
+    {
+        ShowTotalLoot.Logger.LogDebug("AddEnemyValuable_Postfix(): Start Postfix");
+
+
+        if (!LevelGenerator.Instance.Generated)
+        {
+            ShowTotalLoot.Logger.LogError("AddEnemyValuable_Postfix(): LevelGenerator has not finished generating the level");
+            return;
+        }
+        if (_gameHud == null)
+        {
+            ShowTotalLoot.Logger.LogError("AddEnemyValuable_Postfix(): _gameHud is null");
+            return;
+        }
+        if (_maxHaulGoalLabel == null)
+        {
+            ShowTotalLoot.Logger.LogError("AddEnemyValuable_Postfix(): _maxHaulGoalLabel is null");
+            return;
+        }
+        ShowTotalLoot.Instance.StartCoroutine(DelayedAddEnemyValuable(_newValuable));
+    }
+    
+    private static IEnumerator DelayedAddEnemyValuable(EnemyValuable enemyValuable)
+    {
+        yield return new WaitForSeconds(0.5f);
+        ValuableObject valuableObjectComponent = enemyValuable.GetComponent<ValuableObject>();
+        
+        ShowTotalLoot.Logger.LogDebug($"DelayedAddEnemyValuable2(): EnemyValuable name: {enemyValuable.name}");
+        ShowTotalLoot.Logger.LogDebug($"DelayedAddEnemyValuable2(): EnemyValuable name: {valuableObjectComponent.dollarValueOriginal}");
+
+        int addedValue = (int)valuableObjectComponent.dollarValueOriginal;
+        _currentMaxHaul += addedValue;
+        UpdateLabel(_currentMaxHaul);
+    }
+    
     private static void UpdateLabel(int newMaxHaulGoal, [CallerMemberName] string callerName = "")
     {
         ShowTotalLoot.Logger.LogDebug($"{callerName}(): running UpdateLabel()");
-        
+
         if (_maxHaulGoalLabel == null)
-            throw new NullReferenceException("UpdateLabel(): _maxHaulGoalLabel is null");
+        {
+            ShowTotalLoot.Logger.LogError("UpdateLabel(): _maxHaulGoalLabel is null");
+            return;
+        }
         
         ShowTotalLoot.Logger.LogDebug(_maxHaulGoalLabel);
         ShowTotalLoot.Logger.LogDebug($"New Max Haul Goal: {newMaxHaulGoal}");
