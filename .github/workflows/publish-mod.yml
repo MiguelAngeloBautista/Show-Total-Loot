@@ -5,7 +5,7 @@ on:
     types: [published]
 
 env:
-  name: ShotTotalLoot
+  name: ShowTotalLoot
   # Dependencies + Deps Versions
   menulib: 2.3.0 
 
