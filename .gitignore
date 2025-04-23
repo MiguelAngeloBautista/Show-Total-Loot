@@ -494,3 +494,4 @@ fabric.properties
 
 /ExamplePlayerControllerPatch.cs
 *.sln
+/Dependencies/

@@ -29,7 +29,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MenuLib">
-      <HintPath>E:\Thunderstore Mod Manager\DataFolder\REPO\profiles\Dev\BepInEx\plugins\nickklmao-MenuLib\MenuLib.dll</HintPath>
+      <HintPath>Dependencies/MenuLib.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

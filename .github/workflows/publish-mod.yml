@@ -6,6 +6,8 @@ on:
 
 env:
   name: ShotTotalLoot
+  # Dependencies + Deps Versions
+  menulib: 2.3.0 
 
 jobs:
   publish:
@@ -18,6 +20,15 @@ jobs:
         uses: actions/setup-dotnet@v4.3.1
         with: 
           dotnet-version: '9.0.x'
+
+      - name: Download Thunderstore Dependencies
+        run: |
+          mkdir -p Dependencies
+
+          wget https://thunderstore.io/package/download/nickklmao/MenuLib/${{env.menulib}}/ -O menulib.zip
+          unzip menulib.zip -d dep_extracted
+
+          find dep_extracted -name "*.dll" -exec cp {} Dependencies/ \;
     
       - name: Build the mod
         run: dotnet build . -c Release
@@ -40,7 +51,7 @@ jobs:
           version: ${{ github.ref_name }} # Use the tag as the package version
           community: repo
           # A list, separated by spaces
-          deps: BepInEx-BepInExPack@5.4.2100 nickklmao-MenuLib@2.3.0
+          deps: BepInEx-BepInExPack@5.4.2100 nickklmao-MenuLib@${{env.menulib}}
           #A list, separated by newline characters
           categories: |
             clientside
