@@ -14,6 +14,7 @@ public class ShowMaxHaulPatch
     private static int _currentMaxHaul;
     private static Transform? _gameHud;
     private static REPOLabel? _maxHaulGoalLabel;
+    private static bool isBreakRunning = false;
     
     [HarmonyPostfix, HarmonyPatch(typeof(ExtractionPoint), nameof(ExtractionPoint.ActivateTheFirstExtractionPointAutomaticallyWhenAPlayerLeaveTruck))]
     private static void StartRound_Postfix(ExtractionPoint __instance)
@@ -49,17 +50,49 @@ public class ShowMaxHaulPatch
 
     }
 
+
+    [HarmonyPrefix, HarmonyPatch(typeof(PhysGrabObjectImpactDetector), nameof(PhysGrabObjectImpactDetector.BreakRPC))]
+    private static void BreakRPC_Postfix()
+    {
+        isBreakRunning = true;
+    }
+    
     [HarmonyPostfix, HarmonyPatch(typeof(PhysGrabObjectImpactDetector), nameof(PhysGrabObjectImpactDetector.BreakRPC))]
     private static void BreakRPC_Postfix(PhysGrabObjectImpactDetector __instance, float valueLost, bool _loseValue)
     {
+        isBreakRunning = false;
         if (!__instance.valuableObject) return;
         
         ShowTotalLoot.Logger.LogDebug($"BreakRPC_Postfix(): {__instance} Start Postfix");
-        ShowTotalLoot.Logger.LogDebug($"BreakRPC_Postfix(): Item lost Value: {_loseValue}");
+        ShowTotalLoot.Logger.LogDebug($"BreakRPC_Postfix(): Item loseValue?: {_loseValue}");
         
         if (!_loseValue) return;
-        ShowTotalLoot.Logger.LogDebug($"BreakRPC_Postfix(): {__instance.valuableObject.name} lost ${valueLost}");
+        
+        // Check if condition in BreakRPC() has been met (DestoryObject() has been called)
+        if (__instance.valuableObject.dollarValueCurrent < __instance.valuableObject.dollarValueOriginal * 0.15f)
+        {
+            ShowTotalLoot.Logger.LogDebug($"BreakRPC_Postfix(): {__instance.valuableObject.name} Has been destroyed ${valueLost}");
+        }
+        else
+        {
+            ShowTotalLoot.Logger.LogDebug($"BreakRPC_Postfix(): {__instance.valuableObject.name} lost ${valueLost}");
+        }
+            
         _currentMaxHaul -= (int)(valueLost);
+        
+        UpdateLabel(_currentMaxHaul);
+    }
+    
+    [HarmonyPostfix, HarmonyPatch(typeof(PhysGrabObjectImpactDetector), nameof(PhysGrabObjectImpactDetector.DestroyObjectRPC))]
+    private static void DestroyObjectRPC_Postfix(PhysGrabObjectImpactDetector __instance)
+    {
+        if (!__instance.valuableObject) return;
+        if (isBreakRunning) return;
+        
+        ShowTotalLoot.Logger.LogDebug($"DestroyObjectRPC_Postfix(): {__instance} Start Postfix");
+        
+        ShowTotalLoot.Logger.LogDebug($"DestroyObjectRPC_Postfix(): {__instance.valuableObject.name} Has been destroyed ${__instance.valuableObject.dollarValueCurrent}");
+        _currentMaxHaul -= (int)(__instance.valuableObject.dollarValueCurrent);
         
         UpdateLabel(_currentMaxHaul);
 
