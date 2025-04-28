@@ -19,6 +19,7 @@ public class ShowMaxHaulPatch
     private static void StartRound_Postfix(ExtractionPoint __instance)
     {
         ShowTotalLoot.Logger.LogDebug($"StartRound_Postfix(): {__instance} Start Postfix");
+        _currentMaxHaul = 0;
         
         if (!LevelGenerator.Instance.Generated)
         {
