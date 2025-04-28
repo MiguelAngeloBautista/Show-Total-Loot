@@ -145,6 +145,19 @@ public class ShowMaxHaulPatch
         _currentMaxHaul += addedValue;
         UpdateLabel(_currentMaxHaul);
     }
+
+    [HarmonyPostfix, HarmonyPatch(typeof(ClownTrap), nameof(ClownTrap.TrapStop))]
+    private static void ClowTrapStop_Postfix(ClownTrap __instance)
+    {
+        ShowTotalLoot.Logger.LogDebug($"ClowTrapStop_Postfix(): {__instance} Start Postfix");
+
+        int clownCurrentValue = (int)__instance.GetComponentInParent<ValuableObject>().dollarValueCurrent;
+        
+        ShowTotalLoot.Logger.LogDebug($"ClowTrapStop_Postfix(): Clown Current Value: ${clownCurrentValue}");
+        _currentMaxHaul -= clownCurrentValue;
+        
+        UpdateLabel(_currentMaxHaul);
+    }
     
     private static void UpdateLabel(int newMaxHaulGoal, [CallerMemberName] string callerName = "")
     {
